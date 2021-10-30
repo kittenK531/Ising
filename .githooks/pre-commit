@@ -1,0 +1,6 @@
+#!/bin/bash
+
+autoflake --in-place --recursive --remove-all-unused-imports --ignore-init-module-imports . && \
+isort -q . && \
+black -q . && \
+find . -name "*.yml" -exec yq -i -S -Y . {} \;
