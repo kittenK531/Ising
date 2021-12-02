@@ -12,8 +12,8 @@ def initialize(N):
 
     lattice = np.zeros((N + 2, N + 2))
 
-    for i in range(1, N+1):
-        for j in range(1, N+1):
+    for i in range(1, N + 1):
+        for j in range(1, N + 1):
 
             r = random.randint(0, 1)
             lattice[i, j] = r if (r > 0.5) else -1
@@ -21,10 +21,10 @@ def initialize(N):
     print(f"real lattice:\n {lattice}")
 
     """ Periodic Boundary condition """
-    lattice[-1,:] = lattice[1,:]
-    lattice[:,-1] = lattice[:,1]
-    lattice[0,:] = lattice[N-1,:]
-    lattice[:,0] = lattice[:,N-1]
+    lattice[-1, :] = lattice[1, :]
+    lattice[:, -1] = lattice[:, 1]
+    lattice[0, :] = lattice[N - 1, :]
+    lattice[:, 0] = lattice[:, N - 1]
     print(f"After boundary condition, the lattice becomes:\n {lattice}")
 
     return lattice
@@ -48,8 +48,15 @@ def get_energy(x, y, lattice, N):
     right = lattice[int(x) + 1, int(y)]
 
     interaction_E = -1 * lattice[int(x), int(y)] * (top + bottom + left + right)
-    
+
     return interaction_E
+
+
+def get_Boltzmann_factor(E_diff, energy2table):
+
+    for idx, E_ref in enumerate(energy2table[:, 0]):
+        if E_diff == E_ref:
+            return energy2table[idx, 1]
 
 
 def operation(N, beta):
@@ -69,10 +76,11 @@ def operation(N, beta):
     lattice[int(x), int(y)] = lattice[int(x), int(y)] * -1  # flip
     Ef = get_energy(x, y, lattice, N)
 
-    print(Ef - Eo)
-
     """ Step 2: calculate the energy fluctuation """
     energy2table = tabulated_energy(beta)
+    E_diff = Ef - Eo
+
+    print(get_Boltzmann_factor(E_diff, energy2table))
 
 
 """ Execution """
