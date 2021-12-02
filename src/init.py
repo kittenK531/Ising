@@ -12,13 +12,20 @@ def initialize(N):
 
     lattice = np.zeros((N + 2, N + 2))
 
-    for i in range(1, N):
-        for j in range(1, N):
+    for i in range(1, N+1):
+        for j in range(1, N+1):
 
             r = random.randint(0, 1)
             lattice[i, j] = r if (r > 0.5) else -1
 
-    print(lattice)
+    print(f"real lattice:\n {lattice}")
+
+    """ Periodic Boundary condition """
+    lattice[-1,:] = lattice[1,:]
+    lattice[:,-1] = lattice[:,1]
+    lattice[0,:] = lattice[N-1,:]
+    lattice[:,0] = lattice[:,N-1]
+    print(f"After boundary condition, the lattice becomes:\n {lattice}")
 
     return lattice
 
@@ -35,12 +42,14 @@ def tabulated_energy(beta):
 
 def get_energy(x, y, lattice, N):
 
-    return -1 * (
-        (lattice[int(x), int(y)] + lattice[int(x) + 1, int(y)])
-        + (lattice[int(x), int(y)] + lattice[int(x) - 1, int(y)])
-        + (lattice[int(x), int(y)] + lattice[int(x), int(y) + 1])
-        + (lattice[int(x), int(y)] + lattice[int(x), int(y) - 1])
-    )
+    top = lattice[int(x), int(y) + 1]
+    bottom = lattice[int(x), int(y) - 1]
+    left = lattice[int(x) - 1, int(y)]
+    right = lattice[int(x) + 1, int(y)]
+
+    interaction_E = -1 * lattice[int(x), int(y)] * (top + bottom + left + right)
+    
+    return interaction_E
 
 
 def operation(N, beta):
