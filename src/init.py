@@ -70,7 +70,7 @@ def wolff_seq(N, spin0, seed_x, seed_y, beta, J, lattice):
     # enter the start of x, y in x+1, y+1 in manual use
 
     P_add = get_P_add(beta, J)
-    # array = np.zeros((N + 2, N + 2)) # Order
+    array = np.zeros((N + 2, N + 2))  # Order
 
     iteration_count, current_count, visit_number, cluster_count = 1, 1, 0, 0
 
@@ -106,35 +106,35 @@ def wolff_seq(N, spin0, seed_x, seed_y, beta, J, lattice):
                 and current_count < ((N + 2) * (N + 2))
                 and (cx > 0)
                 and (cy > 0)
-                and check_element(y, x, cluster_list)
             ):
 
-                cspin = lattice[int(cy), int(cx)]
+                if check_element(y, x, cluster_list):
+                    cspin = lattice[int(cy), int(cx)]
 
-                # print(f"site = {cy, cx} align = {(spin0 * cspin > 0)}, probability pass = {(random.uniform(0,1) < P_add)}")
+                    # print(f"site = {cy, cx} align = {(spin0 * cspin > 0)}, probability pass = {(random.uniform(0,1) < P_add)}")
 
-                if (spin0 * cspin > 0) and (random.uniform(0, 1) < P_add):
-                    cluster_list[current_count, :] = int(cy), int(cx)
-                    cluster_x, cluster_y = int(cx), int(cy)
-                    Flag = True
-                    cluster_count += 1
-                else:
-                    Flag = False
+                    if (spin0 * cspin > 0) and (random.uniform(0, 1) < P_add):
+                        cluster_list[current_count, :] = int(cy), int(cx)
+                        cluster_x, cluster_y = int(cx), int(cy)
+                        Flag = True
+                        cluster_count += 1
+                    else:
+                        Flag = False
 
-                # array[int(cy), int(cx)] = current_count # order
-                current_count += 1
-                visited_list[current_count - 1, :] = int(cy), int(cx)
+                    current_count += 1
+                    visited_list[current_count - 1, :] = int(cy), int(cx)
 
+                array[int(cy), int(cx)] = current_count - 1  # order
             iteration_count += 1
 
         visit_number += 1
         y, x = visited_list[visit_number, :]  # order
-        print(
-            f"previous cluster {cluster_y, cluster_x}\tThis point {cy, cx} {Flag}\tThe next center is {y,x}"
-        )
-        # y, x = cluster_list[cluster_count]
 
-    # print_real_lattice(N, array, islattice=False)
+        """print(
+            f"previous cluster {cluster_y, cluster_x}\tThis point {cy, cx} {Flag}\tThe next center is {y,x}"
+        )"""
+
+    print_real_lattice(N, array, islattice=False)
 
     return cluster_list
 
@@ -175,7 +175,7 @@ def visualize(N, lattice, name):
 """ Execution """
 J = 1.0
 N = 5
-beta = 1.12
+beta = 0.5
 
 seed_x, seed_y = random.randint(1, N - 2), random.randint(1, N - 2)
 
