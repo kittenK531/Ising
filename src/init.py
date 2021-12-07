@@ -72,7 +72,7 @@ def wolff_seq(N, spin0, seed_x, seed_y, beta, J, lattice):
     P_add = get_P_add(beta, J)
     array = np.zeros((N + 2, N + 2))  # Order
 
-    iteration_count, current_count, visit_number, cluster_count = 1, 1, 0, 0
+    iteration_count, current_count, visit_number, cluster_count, count = 1, 1, 0, 1, 1
 
     start_x, start_y = seed_x, seed_y
 
@@ -114,7 +114,7 @@ def wolff_seq(N, spin0, seed_x, seed_y, beta, J, lattice):
                     # print(f"site = {cy, cx} align = {(spin0 * cspin > 0)}, probability pass = {(random.uniform(0,1) < P_add)}")
 
                     if (spin0 * cspin > 0) and (random.uniform(0, 1) < P_add):
-                        cluster_list[current_count, :] = int(cy), int(cx)
+                        cluster_list[cluster_count, :] = int(cy), int(cx)
                         cluster_x, cluster_y = int(cx), int(cy)
                         Flag = True
                         cluster_count += 1
@@ -124,7 +124,8 @@ def wolff_seq(N, spin0, seed_x, seed_y, beta, J, lattice):
                     current_count += 1
                     visited_list[current_count - 1, :] = int(cy), int(cx)
 
-                array[int(cy), int(cx)] = current_count - 1  # order
+                array[int(cy), int(cx)] = count  # order
+                count += 1
             iteration_count += 1
 
         visit_number += 1
@@ -183,12 +184,12 @@ lattice = initialize(N)
 spin0 = lattice[seed_y, seed_x]
 
 lattice = lattice * spin0  # for visualisation (1: spin0)
-visualize(N, lattice, "init")
+visualize(N, lattice, f"init_{N}")
 
 
 # print(get_P_add(beta, J))
 cluster_list = wolff_seq(N, spin0, seed_x, seed_y, beta, J, lattice)
-# print(cluster_list)
+print(cluster_list)
 lattice, flipped = flip(N, lattice, cluster_list, seed_x, seed_y)
-visualize(N, lattice, "flipped")
-visualize(N, flipped, "crystal")
+visualize(N, lattice, f"flipped_{N}")
+visualize(N, flipped, f"crystal_{N}")
