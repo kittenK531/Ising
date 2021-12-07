@@ -65,7 +65,7 @@ def get_P_add(beta, J):
     return 1 - np.exp(-2 * beta * J)
 
 
-def wolff_seq(N, spin0, seed_x, seed_y, beta, J, lattice):
+def wolff_seq(N, spin0, seed_x, seed_y, beta, J, lattice, cluster_list):
 
     # enter the start of x, y in x+1, y+1 in manual use
 
@@ -79,9 +79,11 @@ def wolff_seq(N, spin0, seed_x, seed_y, beta, J, lattice):
     visited_list = np.ones((N * N, 2))
     visited_list[:, 0], visited_list[:, 1] = start_y, start_x
 
+    """
     cluster_list = np.ones((N * N, 2))
     cluster_list[:, 0], cluster_list[:, 1] = start_y, start_x
     cluster_list[0, :] = seed_y, seed_x
+    """
 
     x, y = start_x, start_y
     cx, cy = x, y
@@ -133,12 +135,10 @@ def wolff_seq(N, spin0, seed_x, seed_y, beta, J, lattice):
 
     print_real_lattice(N, array, islattice=False, Word="After this iteration, lattice")
 
-    return cluster_list[:cluster_count]
+    return cluster_list, cluster_count  # [:cluster_count]
 
 
-def flip(N, lattice, cluster_list, seed_x, seed_y):
-
-    flipped = np.ones((N + 2, N + 2)) * -1
+def flip(N, lattice, cluster_list, seed_x, seed_y, flipped):
 
     for index in cluster_list:
         r, c = index[0], index[1]
@@ -146,7 +146,7 @@ def flip(N, lattice, cluster_list, seed_x, seed_y):
         lattice[int(r), int(c)] = -1 * lattice[int(r), int(c)]
         flipped[int(r), int(c)] = 1
 
-    lattice[seed_y, seed_x] = -1
+    lattice[int(seed_y), int(seed_x)] = -1
 
     return lattice, flipped
 
@@ -169,11 +169,108 @@ def visualize(N, lattice, name):
     plt.show(block=False)
 
 
+def not_outer(x, y, cluster_list):
+
+    dxy = np.array([[0, 1], [-1, 0], [0, -1], [1, 0]])
+
+    Flag = True
+
+    for j in dxy:
+
+        cx = x + j[1]
+        cy = y + j[0]
+
+        Flag = Flag and check_element(cx, cy, cluster_list)
+
+    return Flag
+
+
+def get_index_outer(cluster_list):
+
+    out_index = np.zeros(len(cluster_list))
+    out_count = 0
+
+    for idx in range(len(cluster_list)):
+
+        y, x = cluster_list[idx, :]
+
+        if not not_outer(x, y, cluster_list):
+
+            out_index[out_count] = idx
+            out_count += 1
+
+            print(f"outer: {cluster_list[idx]}")
+
+    if out_count == 1:
+        return out_index
+    else:
+        return out_index[:out_count]
+
+
+def grow(J, N, beta):
+    pass
+
+    seed_x, seed_y = random.randint(1, N - 2), random.randint(1, N - 2)
+
+    # lattice = initialize(N)
+    lattice = np.ones((N + 2, N + 2))
+    lattice[N, N] = -1
+
+    flipped = np.ones(lattice.shape) * -1
+    spin0 = lattice[seed_y, seed_x]
+
+    lattice = lattice * spin0  # for visualisation (1: spin0)
+    visualize(N, lattice, f"init_{N}")
+
+    cluster_list = np.ones((N * N, 2))
+    cluster_list[:, 0], cluster_list[:, 1] = seed_y, seed_x
+    cluster_list[0, :] = seed_y, seed_x
+
+    cluster_list, cluster_count = wolff_seq(
+        N, spin0, seed_x, seed_y, beta, J, lattice, cluster_list
+    )
+    lattice, flipped = flip(N, lattice, cluster_list, seed_x, seed_y, flipped)
+
+    print(f"flippex {flipped.shape}")
+
+    total_member = cluster_count
+
+    print(cluster_list[:total_member])
+
+    visualize(N, lattice, f"flipped_{N}")
+    visualize(N, flipped, f"crystal_{N}")
+
+    for iter in range(50):
+
+        outer_list = get_index_outer(cluster_list[:cluster_count])
+
+        r = random.randint(0, len(outer_list) - 1)
+
+        outer_idx = outer_list[r]
+
+        seed_y, seed_x = cluster_list[int(outer_idx), :]
+
+        cluster_list, cluster_count = wolff_seq(
+            N, spin0, seed_x, seed_y, beta, J, lattice, cluster_list
+        )
+        print(cluster_list)
+        lattice, flipped = flip(N, lattice, cluster_list, seed_x, seed_y, flipped)
+
+        total_member += cluster_count
+
+        visualize(N, lattice, f"flipped_{N}")
+        visualize(N, flipped, f"crystal_{N}")
+        # print(cluster_list[:total_member])
+
+        # time.sleep(0.2)
+
+
 """ Execution """
 J = 1.0
-N = 5
-beta = 0.5
+N = 50
+beta = 0.02
 
+"""
 seed_x, seed_y = random.randint(1, N - 2), random.randint(1, N - 2)
 
 lattice = initialize(N)
@@ -189,3 +286,5 @@ print(f"Cluster list: {cluster_list}")
 lattice, flipped = flip(N, lattice, cluster_list, seed_x, seed_y)
 visualize(N, lattice, f"flipped_{N}")
 visualize(N, flipped, f"crystal_{N}")
+"""
+grow(J, N, beta)
