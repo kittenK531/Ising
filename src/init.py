@@ -4,10 +4,10 @@ import numpy as np
 from tqdm import tqdm
 
 
-def print_real_lattice(N, lattice, islattice=True):
+def print_real_lattice(N, lattice, islattice=True, Word="Read lattice"):
 
     if islattice:
-        print(f"Real lattice: \n{lattice[1:N+1, 1:N+1]}")
+        print(f"{Word}: \n{lattice[1:N+1, 1:N+1]}")
     else:
         print(f"Order: \n{lattice[1:N+1, 1:N+1]}")
 
@@ -32,7 +32,7 @@ def initialize(N):
     # print(f"real lattice:\n {lattice}")
 
     print(f"The initialized random configuration of {N}*{N} lattice is")
-    print_real_lattice(N, lattice)
+    print_real_lattice(N, lattice, Word="Initialized lattice")
 
     """ Periodic Boundary condition """
     lattice[-1, :] = lattice[1, :]
@@ -86,8 +86,6 @@ def wolff_seq(N, spin0, seed_x, seed_y, beta, J, lattice):
     x, y = start_x, start_y
     cx, cy = x, y
 
-    cluster_x, cluster_y = cx, cy
-
     dxy = np.array([[0, 1], [-1, 0], [0, -1], [1, 0]])
 
     print(f"Seed: {seed_y, seed_x}")
@@ -108,18 +106,16 @@ def wolff_seq(N, spin0, seed_x, seed_y, beta, J, lattice):
                 and (cy > 0)
             ):
 
-                if check_element(y, x, cluster_list):
-                    cspin = lattice[int(cy), int(cx)]
+                not_neigh_cluster = (
+                    check_element(cy, cx, cluster_list) == None
+                )  # [2] not operate if current neighbour is cluster member
 
-                    # print(f"site = {cy, cx} align = {(spin0 * cspin > 0)}, probability pass = {(random.uniform(0,1) < P_add)}")
+                if check_element(y, x, cluster_list) and not_neigh_cluster:
+                    cspin = lattice[int(cy), int(cx)]
 
                     if (spin0 * cspin > 0) and (random.uniform(0, 1) < P_add):
                         cluster_list[cluster_count, :] = int(cy), int(cx)
-                        cluster_x, cluster_y = int(cx), int(cy)
-                        Flag = True
                         cluster_count += 1
-                    else:
-                        Flag = False
 
                     current_count += 1
                     visited_list[current_count - 1, :] = int(cy), int(cx)
@@ -135,9 +131,9 @@ def wolff_seq(N, spin0, seed_x, seed_y, beta, J, lattice):
             f"previous cluster {cluster_y, cluster_x}\tThis point {cy, cx} {Flag}\tThe next center is {y,x}"
         )"""
 
-    print_real_lattice(N, array, islattice=False)
+    print_real_lattice(N, array, islattice=False, Word="After this iteration, lattice")
 
-    return cluster_list
+    return cluster_list[:cluster_count]
 
 
 def flip(N, lattice, cluster_list, seed_x, seed_y):
@@ -157,14 +153,14 @@ def flip(N, lattice, cluster_list, seed_x, seed_y):
 
 def visualize(N, lattice, name):
 
-    lattice = print_real_lattice(N, lattice)
+    lattice = print_real_lattice(N, lattice, Word=name)
 
     for r in range(N):
         for c in range(N):
             if lattice[r, c] < 0:
                 lattice[r, c] = 0
 
-    print(lattice)
+    # print(lattice)
 
     import matplotlib.pyplot as plt
 
@@ -189,7 +185,7 @@ visualize(N, lattice, f"init_{N}")
 
 # print(get_P_add(beta, J))
 cluster_list = wolff_seq(N, spin0, seed_x, seed_y, beta, J, lattice)
-print(cluster_list)
+print(f"Cluster list: {cluster_list}")
 lattice, flipped = flip(N, lattice, cluster_list, seed_x, seed_y)
 visualize(N, lattice, f"flipped_{N}")
 visualize(N, flipped, f"crystal_{N}")
