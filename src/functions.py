@@ -71,21 +71,20 @@ def get_P_add(beta, J):
     return 1 - np.exp(-2 * beta * J)
 
 
-def is_neighbour(cy, cx, cluster_list):
+def is_neighbour(cy, cx, crystal):
 
     dxy = np.array([[0, 1], [-1, 0], [0, -1], [1, 0]])
 
-    Flag = True  # not neighbour
+    sum = 0
 
     for j in dxy:
 
         nx = cx + j[1]
         ny = cy + j[0]
 
-        Flag = Flag and (not check_element(cx, cy, cluster_list))
+        sum += crystal[ny, nx]
 
-    if Flag == False:
-
+    if sum > 0:
         return True
     else:
         return False
@@ -159,7 +158,7 @@ def visualize(N, lattice, name):
     plt.show(block=False)
 
 
-def sequence_loop(N, start_x, start_y):
+def sequence_loop(N, start_y, start_x):
 
     # enter the start of x, y in x+1, y+1 in manual use
 
@@ -394,3 +393,34 @@ def debug_mode(J, N, beta):
 
 
 # grow(1, 10, 0.3)
+
+
+def get_neighbour_list(cy, cx):
+
+    dxy = np.array([[0, 1], [-1, 0], [0, -1], [1, 0]])
+
+    neighbour = np.zeros((4, 2))
+
+    for i in range(4):
+        neighbour[i, 0], neighbour[i, 0] = cy + dxy[i, 0], cx + dxy[i, 1]
+
+    return neighbour
+
+
+def match(array_1, array_2):
+
+    for i in array_1:
+        x, y = i[0], i[1]
+
+        for i in range(len(array_2)):
+            if x == array_2[i, 0]:
+                if y == array_2[i, 1]:
+
+                    return True
+
+
+"""
+test = np.array([[1,2], [3,4]])
+test2 = np.array([[2,3],[3,4],[5,6]])
+print(match(test, test2))
+"""
