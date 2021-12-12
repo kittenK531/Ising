@@ -6,3 +6,6 @@
 **.gz
 **.fdb_latexmk
 **.DS_Store
+
+# Ignore cache
+**/__pycache__/
