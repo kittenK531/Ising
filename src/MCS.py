@@ -2,48 +2,7 @@ import random
 
 import numpy as np
 
-from init import check_element
-
-
-def print_real_lattice(N, lattice, islattice=True):
-
-    if islattice:
-        print(f"Real lattice: \n{lattice[1:N+1, 1:N+1]}")
-    else:
-        print(f"Order: \n{lattice[1:N+1, 1:N+1]}")
-
-    # return lattice[1:N+1, 1:N+1]
-
-
-def initialize(N):
-    """Produces a 2d array containing position of square array
-    N: number of particles per axis
-
-    return [N * N] array size numpy array
-    """
-
-    lattice = np.zeros((N + 2, N + 2))
-
-    for i in range(1, N + 1):
-        for j in range(1, N + 1):
-
-            r = random.randint(0, 1)
-            lattice[i, j] = r if (r > 0.5) else -1
-
-    # print(f"real lattice:\n {lattice}")
-
-    print(f"The initialized random configuration of {N}*{N} lattice is")
-    print_real_lattice(N, lattice)
-
-    """ Periodic Boundary condition """
-    lattice[-1, :] = lattice[1, :]
-    lattice[:, -1] = lattice[:, 1]
-    lattice[0, :] = lattice[N - 1, :]
-    lattice[:, 0] = lattice[:, N - 1]
-
-    # print(f"After boundary condition, the lattice becomes:\n {lattice}")
-
-    return lattice
+from functions import check_element, initialize, print_real_lattice
 
 
 def tabulated_energy(beta, J=1.0):

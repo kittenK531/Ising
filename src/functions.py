@@ -1,15 +1,16 @@
 import random
+import shutil
+from pathlib import Path
 
+import matplotlib.pyplot as plt
 import numpy as np
 from tqdm import tqdm
 
 
-def print_real_lattice(N, lattice, islattice=True, Word="Read lattice"):
+def print_real_lattice(N, lattice, printf=True, Word="Real lattice"):
 
-    if islattice:
+    if printf:
         print(f"{Word}: \n{lattice[1:N+1, 1:N+1]}")
-    else:
-        print(f"Order: \n{lattice[1:N+1, 1:N+1]}")
 
     return lattice[1 : N + 1, 1 : N + 1]
 
@@ -140,22 +141,73 @@ def get_outer_list(cluster_list):
     return outer_list
 
 
-def visualize(N, lattice, name):
+def visualize(N, lattice, name, folder="record"):
 
-    lattice = print_real_lattice(N, lattice, Word=name)
+    lattice = print_real_lattice(N, lattice, printf=False, Word=name)
 
     for r in range(N):
         for c in range(N):
             if lattice[r, c] < 0:
                 lattice[r, c] = 0
 
-    # print(lattice)
-
-    import matplotlib.pyplot as plt
+    Path(f"{folder}/{N}").mkdir(parents=True, exist_ok=True)
 
     plt.imshow(lattice, cmap="Greys")
-    plt.savefig(f"{name}.png")
+    plt.savefig(f"{folder}/{N}/{name}_{N}.png")
     plt.show(block=False)
+
+
+def save_frame(N, lattice, name, iteration, folder="record"):
+
+    lattice = print_real_lattice(N, lattice, printf=False, Word=name)
+
+    Path(f"{folder}/{N}/animate").mkdir(parents=True, exist_ok=True)
+
+    for r in range(N):
+        for c in range(N):
+            if lattice[r, c] < 0:
+                lattice[r, c] = 0
+
+    plt.imshow(lattice, cmap="Greys")
+    plt.savefig(f"{folder}/{N}/animate/{name}_{iteration}.png")
+    plt.show(block=False)
+
+
+def combine(N, iteration, foldername="record", name_1="flipped", name_2="crystal"):
+
+    from PIL import Image
+
+    im1 = Image.open(f"{foldername}/{N}/animate/{name_1}_{iteration}.png")
+    im2 = Image.open(f"{foldername}/{N}/animate/{name_2}_{iteration}.png")
+
+    dst = Image.new("RGB", (im1.width + im2.width, im1.height))
+    dst.paste(im1, (0, 0))
+    dst.paste(im2, (im1.width, 0))
+
+    Path(f"{foldername}/{N}/animate/combined").mkdir(parents=True, exist_ok=True)
+    dst.save(f"{foldername}/{N}/animate/combined/{iteration}.png")
+
+
+def make_GIF(N, iterations, foldername="record", clean=True):
+
+    import imageio
+
+    filename = [
+        f"{foldername}/{N}/animate/combined/{idx}.png" for idx in range(iterations + 1)
+    ]
+
+    with imageio.get_writer(
+        f"{foldername}/{N}/grow_{iterations}.gif", mode="I"
+    ) as writer:
+
+        for name in filename:
+
+            image = imageio.imread(name)
+            writer.append_data(image)
+
+    if clean:
+
+        shutil.rmtree(f"{foldername}/{N}/animate")
 
 
 def sequence_loop(N, start_y, start_x):
@@ -206,7 +258,7 @@ def sequence_loop(N, start_y, start_x):
 
     # print(visited_list)
 
-    print_real_lattice(N, array, islattice=False)
+    print_real_lattice(N, array, printf=False, Word="Order")
 
     return visited_list
 
@@ -297,7 +349,7 @@ def wolff_seq(N, spin0, seed_x, seed_y, beta, J, lattice, cluster_list):
         visit_number += 1
         y, x = visited_list[visit_number, :]  # order
 
-    print_real_lattice(N, array, islattice=False, Word="After this iteration, lattice")
+    print_real_lattice(N, array, printf=False, Word="After this iteration, lattice")
 
     return cluster_list, cluster_count  # [:cluster_count]
 
