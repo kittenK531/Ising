@@ -7,40 +7,13 @@ from functions import (
     flip,
     get_index_outer,
     get_P_add,
-    initialize,
     is_neighbour,
     make_GIF,
+    preparation,
     save_frame,
     sequence_loop,
     visualize,
 )
-
-
-def preparation(N):
-
-    seed_x, seed_y = random.randint(1, N - 2), random.randint(1, N - 2)
-
-    lattice = initialize(N)
-    """
-    lattice = np.ones((N + 2, N + 2))
-    lattice[N, N] = -1
-    """
-
-    spin0 = lattice[seed_y, seed_x]
-
-    lattice = lattice * spin0  # for visualisation (1: spin0)
-
-    """ Global array """
-
-    cluster_list = np.ones((1, 2))
-    cluster_list[0, :] = seed_y, seed_x
-
-    flipped = np.ones(lattice.shape) * -1
-
-    crystal = np.zeros(lattice.shape)  # for neighbour
-    crystal[seed_y, seed_x] = 1
-
-    return lattice, seed_y, seed_x, cluster_list, flipped, crystal
 
 
 def growth(sequence, lattice, spin0, Pr, cluster_list, crystal):

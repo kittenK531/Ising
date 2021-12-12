@@ -2,7 +2,7 @@ import random
 
 import numpy as np
 
-from functions import check_element, initialize, print_real_lattice
+from functions import preparation, sequence_loop, visualize
 
 
 def tabulated_energy(beta, J=1.0):
@@ -34,88 +34,62 @@ def get_Boltzmann_factor(E_diff, energy2table):
             return energy2table[idx, 1]
 
 
-def MCS(N, beta, J):
+def MCS(N, beta, J, lattice, seed_y, seed_x, cluster_list, flipped):
 
-    """Step 0: initialize cubic lattice with random spin configuration"""
-    lattice = initialize(N)
-
-    """ Step 1: choose a random lattice point spin to flip as cluster point """
-    flipped = np.zeros((N ** 2, 2))  # max number flipped is N ** 2
-    flipped[0, :] = random.randint(1, N - 2), random.randint(
-        1, N - 2
-    )  # record the coord of the flipped spin
-
-    x, y = flipped[0, :]
+    x, y = seed_y, seed_x
     Eo = get_energy(x, y, lattice, N)
-
     lattice[int(x), int(y)] = lattice[int(x), int(y)] * -1  # flip
     Ef = get_energy(x, y, lattice, N)
+    lattice[int(x), int(y)] = lattice[int(x), int(y)] * -1
 
     """ Step 2: calculate the energy fluctuation """
     energy2table = tabulated_energy(beta, J)
     E_diff = Ef - Eo
 
-    print(f"Energy difference is {E_diff}")
+    if (E_diff < 0) or random.uniform(0, 1) < get_Boltzmann_factor(
+        E_diff, energy2table
+    ):
+        lattice[int(x), int(y)] = lattice[int(x), int(y)] * -1
+        new_cluster_mem = np.array([[int(y), int(x)]])
+        cluster_list = np.vstack((cluster_list, new_cluster_mem))
+        flipped[int(y), int(x)] = 1
 
-    print(f"Tabulated energy array is {energy2table}")
+    print(f"Energy difference is {E_diff}")
     print(f"The boltzmann factor is {get_Boltzmann_factor(E_diff, energy2table)}.")
 
-
-MCS(5, 0.5, 1)
-
-""" back up """
+    return lattice, cluster_list, flipped
 
 
-def sequence_loop(N, start_x, start_y):
+def iterative(N, beta, J, lattice, seed_y, seed_x, cluster_list, flipped):
 
-    # enter the start of x, y in x+1, y+1 in manual use
+    x, y = seed_y, seed_x
 
-    array = np.zeros((N + 2, N + 2))
+    array = sequence_loop(N, x, y)
 
-    iteration_count, current_count, visit_number = 1, 1, 0
+    for i in array:
 
-    visited_list = np.ones((N * N, 2))
-    visited_list[:, 0], visited_list[:, 1] = start_y, start_x
+        x, y = int(i[0]), int(i[1])
 
-    x, y = start_x, start_y
-    cx, cy = x, y
+        lattice, cluster_list, flipped = MCS(
+            N, beta, J, lattice, x, y, cluster_list, flipped
+        )
 
-    dxy = np.array([[0, 1], [-1, 0], [0, -1], [1, 0]])
+    return lattice, flipped
 
-    for i in range(N * N - 1):
 
-        for j in dxy:
+""" Execution """
+J = 1.0
+N = 50
+beta = 0.2
 
-            cx = x + j[1]
-            cy = y + j[0]
+lattice, seed_y, seed_x, cluster_list, flipped, crystal = preparation(N)
 
-            # print(y, x, cy, cx, not check_element(cx, cy, visited_list), (cx < N+1), (cy < N+1), current_count < (N*N), (cx > 0), (cy > 0))
+# MCS(N, beta, J, lattice, seed_y, seed_x, cluster_list, flipped)
+lattice, flipped = iterative(N, beta, J, lattice, seed_y, seed_x, cluster_list, flipped)
 
-            if (
-                not check_element(cy, cx, visited_list)
-                and (cx < N + 1)
-                and (cy < N + 1)
-                and current_count < ((N + 2) * (N + 2))
-                and (cx > 0)
-                and (cy > 0)
-            ):
-                """
-                print(
-                    f"Index: {cx, cy}, current count: {current_count}, iteration count: {iteration_count}, using xy from visited list [{visit_number}] of {y,x}"
-                )
-                """
-                array[int(cy), int(cx)] = current_count  # order
-                current_count += 1
-                visited_list[current_count - 1, :] = int(cy), int(cx)
-                # print(array)
-
-            iteration_count += 1
-
-        visit_number += 1
-        y, x = visited_list[visit_number, :]
-
-    # print(visited_list)
-
-    print_real_lattice(N, array, islattice=False)
-
-    return array
+visualize(N, lattice, "flipped_local")
+visualize(N, flipped, "crystal_local")
+"""
+visualize(N, lattice, f"init_local")
+MCS(N, beta, J, seed_x, seed_y, lattice, cluster_list, flipped)
+print(f"Tabulated energy array is {tabulated_energy(beta, J)}")"""

@@ -141,9 +141,9 @@ def get_outer_list(cluster_list):
     return outer_list
 
 
-def visualize(N, lattice, name, folder="record"):
+def visualize(N, lattice, name, folder="record", printf=False):
 
-    lattice = print_real_lattice(N, lattice, printf=False, Word=name)
+    lattice = print_real_lattice(N, lattice, printf=printf, Word=name)
 
     for r in range(N):
         for c in range(N):
@@ -457,6 +457,33 @@ def get_neighbour_list(cy, cx):
         neighbour[i, 0], neighbour[i, 0] = cy + dxy[i, 0], cx + dxy[i, 1]
 
     return neighbour
+
+
+def preparation(N):
+
+    seed_x, seed_y = random.randint(1, N - 2), random.randint(1, N - 2)
+
+    lattice = initialize(N)
+    """
+    lattice = np.ones((N + 2, N + 2))
+    lattice[N, N] = -1
+    """
+
+    spin0 = lattice[seed_y, seed_x]
+
+    lattice = lattice * spin0  # for visualisation (1: spin0)
+
+    """ Global array """
+
+    cluster_list = np.ones((1, 2))
+    cluster_list[0, :] = seed_y, seed_x
+
+    flipped = np.ones(lattice.shape) * -1
+
+    crystal = np.zeros(lattice.shape)  # for neighbour
+    crystal[seed_y, seed_x] = 1
+
+    return lattice, seed_y, seed_x, cluster_list, flipped, crystal
 
 
 def match(array_1, array_2):
