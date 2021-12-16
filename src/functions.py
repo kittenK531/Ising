@@ -15,7 +15,7 @@ def print_real_lattice(N, lattice, printf=True, Word="Real lattice"):
     return lattice[1 : N + 1, 1 : N + 1]
 
 
-def initialize(N):
+def initialize(N, seed_x, seed_y):
     """Produces a 2d array containing position of square array
     N: number of particles per axis
 
@@ -41,7 +41,9 @@ def initialize(N):
     lattice[0, :] = lattice[N - 1, :]
     lattice[:, 0] = lattice[:, N - 1]
 
-    # print(f"After boundary condition, the lattice becomes:\n {lattice}")
+    spin0 = lattice[seed_y, seed_x]
+
+    lattice = lattice * spin0  # for visualisation (1: spin0)
 
     return lattice
 
@@ -411,42 +413,6 @@ def grow(J, N, beta):
         # time.sleep(0.2)
 
 
-""" Debug mode """
-
-
-def debug_mode(J, N, beta):
-
-    seed_x, seed_y = random.randint(1, N - 2), random.randint(1, N - 2)
-
-    lattice = np.ones((N + 2, N + 2))
-    lattice[N, N] = -1
-
-    flipped = np.ones(lattice.shape) * -1
-    spin0 = lattice[seed_y, seed_x]
-
-    lattice = lattice * spin0  # for visualisation (1: spin0)
-    visualize(N, lattice, f"init_{N}")  # TODO: uncomment
-
-    cluster_list = np.ones((N * N, 2))
-    cluster_list[:, 0], cluster_list[:, 1] = seed_y, seed_x
-    cluster_list[0, :] = seed_y, seed_x
-
-    cluster_list, cluster_count = wolff_seq(
-        N, spin0, seed_x, seed_y, beta, J, lattice, cluster_list
-    )
-    lattice, flipped = flip(N, lattice, cluster_list, seed_x, seed_y, flipped)
-
-    print(f"flippex {flipped.shape}")
-
-    visualize(N, lattice, f"flipped_{N}")
-    visualize(N, flipped, f"crystal_{N}")
-
-    return seed_x, seed_y
-
-
-# grow(1, 10, 0.3)
-
-
 def get_neighbour_list(cy, cx):
 
     dxy = np.array([[0, 1], [-1, 0], [0, -1], [1, 0]])
@@ -459,21 +425,16 @@ def get_neighbour_list(cy, cx):
     return neighbour
 
 
-def preparation(N):
+def get_seed(N):
 
     seed_x, seed_y = random.randint(1, N - 2), random.randint(1, N - 2)
 
-    lattice = initialize(N)
-    """
-    lattice = np.ones((N + 2, N + 2))
-    lattice[N, N] = -1
-    """
+    return seed_x, seed_y
 
-    spin0 = lattice[seed_y, seed_x]
 
-    lattice = lattice * spin0  # for visualisation (1: spin0)
+def preparation(lattice, seed_x, seed_y):
 
-    """ Global array """
+    """Global array"""
 
     cluster_list = np.ones((1, 2))
     cluster_list[0, :] = seed_y, seed_x
@@ -483,7 +444,7 @@ def preparation(N):
     crystal = np.zeros(lattice.shape)  # for neighbour
     crystal[seed_y, seed_x] = 1
 
-    return lattice, seed_y, seed_x, cluster_list, flipped, crystal
+    return cluster_list, flipped, crystal
 
 
 def match(array_1, array_2):
@@ -496,6 +457,26 @@ def match(array_1, array_2):
                 if y == array_2[i, 1]:
 
                     return True
+
+
+def get_seed2b_list(N, lattice):
+
+    not_flipped = np.zeros((N * N, 2))
+
+    count = 0
+
+    for r in range(1, N + 1):
+        for c in range(1, N + 1):
+
+            spinc = lattice[r, c]
+
+            if spinc > 0:
+
+                not_flipped[count, :] = r, c
+
+                count += 1
+
+    return not_flipped[:count]
 
 
 """
