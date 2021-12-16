@@ -45,7 +45,9 @@ def initialize(N, seed_x, seed_y):
 
     lattice = lattice * spin0  # for visualisation (1: spin0)
 
-    return lattice
+    flipped = np.ones(lattice.shape) * -1
+
+    return lattice, flipped
 
 
 def check_element(x, y, list):
@@ -188,6 +190,15 @@ def combine(N, iteration, foldername="record", name_1="flipped", name_2="crystal
 
     Path(f"{foldername}/{N}/animate/combined").mkdir(parents=True, exist_ok=True)
     dst.save(f"{foldername}/{N}/animate/combined/{iteration}.png")
+
+
+def animate(N, lattice, flipped, previous_count, iterations):
+
+    idx = previous_count + iterations
+
+    save_frame(N, lattice, "flipped", iteration=idx)
+    save_frame(N, flipped, "crystal", iteration=idx)
+    combine(N, iteration=idx)
 
 
 def make_GIF(N, iterations, foldername="record", clean=True):
@@ -439,12 +450,10 @@ def preparation(lattice, seed_x, seed_y):
     cluster_list = np.ones((1, 2))
     cluster_list[0, :] = seed_y, seed_x
 
-    flipped = np.ones(lattice.shape) * -1
-
     crystal = np.zeros(lattice.shape)  # for neighbour
     crystal[seed_y, seed_x] = 1
 
-    return cluster_list, flipped, crystal
+    return cluster_list, crystal
 
 
 def match(array_1, array_2):

@@ -3,7 +3,7 @@ import random
 import numpy as np
 
 from functions import (
-    combine,
+    animate,
     flip,
     get_index_outer,
     get_P_add,
@@ -13,7 +13,6 @@ from functions import (
     is_neighbour,
     make_GIF,
     preparation,
-    save_frame,
     sequence_loop,
     visualize,
 )
@@ -44,7 +43,16 @@ def growth(sequence, lattice, spin0, Pr, cluster_list, crystal):
 
 
 def iterative(
-    N, start_x, start_y, Pr, cluster_list, flipped, lattice_pos, crystal, iterations=10
+    N,
+    start_x,
+    start_y,
+    Pr,
+    cluster_list,
+    flipped,
+    lattice_pos,
+    crystal,
+    previous_count,
+    iterations=10,
 ):
 
     seed_y, seed_x = start_y, start_x
@@ -52,9 +60,7 @@ def iterative(
 
     spin0 = lattice[seed_y, seed_x]
 
-    save_frame(N, lattice, "flipped", iteration=0)
-    save_frame(N, flipped, "crystal", iteration=0)
-    combine(N, iteration=0)
+    animate(N, lattice, flipped, previous_count, 0)
 
     for i in range(iterations):
         array = sequence_loop(N, seed_y, seed_x)
@@ -64,11 +70,7 @@ def iterative(
         visualize(N, lattice, "flipped")
         visualize(N, flipped, "crystal")
 
-        """ animate """
-        save_frame(N, lattice, "flipped", iteration=i + 1)
-        save_frame(N, flipped, "crystal", iteration=i + 1)
-
-        combine(N, iteration=i + 1)
+        animate(N, lattice, flipped, previous_count, iterations=i + 1)
 
         index_arr = get_index_outer(cluster_list)
         # print(index_arr)
@@ -76,27 +78,27 @@ def iterative(
         seed_y, seed_x = cluster_list[r, :]
         print(f"iter: {i+1}/{iterations} Seed: {seed_y, seed_x}")
 
-    make_GIF(N, iterations)
-
-    return lattice
+    return lattice, flipped, iterations
 
 
 def whole_growth(N, beta, J, iterations):
 
     seed_y, seed_x = get_seed(N)
 
-    lattice = initialize(N, seed_x, seed_y)
+    lattice, flipped = initialize(N, seed_x, seed_y)
+
+    previous_count = 0
 
     for i in range(iterations):
 
-        cluster_list, flipped, crystal = preparation(lattice, seed_x, seed_y)
+        cluster_list, crystal = preparation(lattice, seed_x, seed_y)
 
         if i == 0:
             visualize(N, lattice, f"init")
 
         Pr = get_P_add(beta, J)
 
-        lattice = iterative(
+        lattice, flipped, cluster_iter = iterative(
             N,
             seed_x,
             seed_y,
@@ -105,6 +107,7 @@ def whole_growth(N, beta, J, iterations):
             flipped,
             lattice,
             crystal,
+            previous_count,
             iterations=20,
         )
 
@@ -113,6 +116,10 @@ def whole_growth(N, beta, J, iterations):
         r = random.randint(0, len(unflipped))
 
         seed_y, seed_x = int(unflipped[r, 0]), int(unflipped[r, 1])
+
+        previous_count += cluster_iter
+
+    make_GIF(N, previous_count, clean=True)
 
 
 """ Execution """
