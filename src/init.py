@@ -12,6 +12,7 @@ from functions import (
     initialize,
     is_neighbour,
     make_GIF,
+    not_terminate,
     preparation,
     sequence_loop,
     visualize,
@@ -52,7 +53,6 @@ def iterative(
     lattice_pos,
     crystal,
     previous_count,
-    iterations=10,
 ):
 
     seed_y, seed_x = start_y, start_x
@@ -62,7 +62,9 @@ def iterative(
 
     animate(N, lattice, flipped, previous_count, 0)
 
-    for i in range(iterations):
+    i = 0
+
+    while not_terminate(lattice, cluster_list):
         array = sequence_loop(N, seed_y, seed_x)
         cluster_list = growth(array, lattice, spin0, Pr, cluster_list, crystal)
         # print(f"Cluster: {cluster_list}")
@@ -76,12 +78,15 @@ def iterative(
         # print(index_arr)
         r = random.randint(0, len(index_arr) - 1)
         seed_y, seed_x = cluster_list[r, :]
-        print(f"iter: {i+1}/{iterations} Seed: {seed_y, seed_x}")
+        print(f"iter: {i+1} Seed: {seed_y, seed_x}")
+        i += 1
+
+    iterations = i
 
     return lattice, flipped, iterations
 
 
-def whole_growth(N, beta, J, iterations):
+def whole_growth(N, beta, J):
 
     seed_y, seed_x = get_seed(N)
 
@@ -89,7 +94,13 @@ def whole_growth(N, beta, J, iterations):
 
     previous_count = 0
 
-    for i in range(iterations):
+    unflipp_num = 1
+
+    i = 0
+
+    while unflipp_num > 0:
+
+        print(f"Overall cluster iteration: {i+1}")
 
         cluster_list, crystal = preparation(lattice, seed_x, seed_y)
 
@@ -108,23 +119,30 @@ def whole_growth(N, beta, J, iterations):
             lattice,
             crystal,
             previous_count,
-            iterations=20,
         )
 
         unflipped = get_seed2b_list(N, lattice)
 
-        r = random.randint(0, len(unflipped))
-
-        seed_y, seed_x = int(unflipped[r, 0]), int(unflipped[r, 1])
-
         previous_count += cluster_iter
+
+        if len(unflipped) - 1 >= 0:
+            r = random.randint(0, len(unflipped) - 1)
+
+            seed_y, seed_x = int(unflipped[r, 0]), int(unflipped[r, 1])
+
+        else:
+            break
+
+        i += 1
+
+    previous_count += i
 
     make_GIF(N, previous_count, clean=True)
 
 
 """ Execution """
 J = 1.0
-N = 50
+N = 5
 beta = 0.2
 
-whole_growth(N, beta, J, 3)
+whole_growth(N, beta, J)

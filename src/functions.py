@@ -145,6 +145,37 @@ def get_outer_list(cluster_list):
     return outer_list
 
 
+def not_terminate(lattice, cluster_list):
+
+    lattice[-1, :] = 0
+    lattice[:, -1] = 0
+    lattice[0, :] = 0
+    lattice[:, 0] = 0
+
+    outer_list = get_outer_list(cluster_list)
+
+    dxy = np.array([[0, 1], [-1, 0], [0, -1], [1, 0]])
+
+    sum = 0
+
+    for i in outer_list:
+
+        y, x = i[0], i[1]
+
+        sum += lattice[int(y), int(x)]
+
+        for j in dxy:
+
+            cy, cx = y + j[0], x + j[1]
+
+            sum += lattice[int(cy), int(cx)]
+
+    if sum > 0:
+        return True
+    else:
+        return False
+
+
 def visualize(N, lattice, name, folder="record", printf=False):
 
     lattice = print_real_lattice(N, lattice, printf=printf, Word=name)
@@ -206,7 +237,7 @@ def make_GIF(N, iterations, foldername="record", clean=True):
     import imageio
 
     filename = [
-        f"{foldername}/{N}/animate/combined/{idx}.png" for idx in range(iterations + 1)
+        f"{foldername}/{N}/animate/combined/{idx}.png" for idx in range(iterations)
     ]
 
     with imageio.get_writer(
