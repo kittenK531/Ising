@@ -232,9 +232,15 @@ def animate(N, lattice, flipped, previous_count, iterations):
     combine(N, iteration=idx)
 
 
-def make_GIF(N, iterations, foldername="record", clean=True):
+def make_GIF(N, foldername="record", clean=True):
 
     import imageio
+
+    iterations = 0
+
+    for path in Path(f"{foldername}/{N}/animate/combined").iterdir():
+        if path.is_file():
+            iterations += 1
 
     filename = [
         f"{foldername}/{N}/animate/combined/{idx}.png" for idx in range(iterations)
