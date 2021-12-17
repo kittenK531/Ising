@@ -2,7 +2,15 @@ import random
 
 import numpy as np
 
-from functions import get_seed, initialize, preparation, sequence_loop, visualize
+from functions import (
+    get_seed,
+    initialize,
+    make_GIF_local,
+    preparation,
+    save_frame,
+    sequence_loop,
+    visualize,
+)
 
 
 def tabulated_energy(beta, J=1.0):
@@ -95,9 +103,9 @@ def run(N, beta, J, iterations):
 
     lattice, flipped = initialize(N, seed_x, seed_y)
 
-    visualize(N, lattice, f"init_local")
+    visualize(N, lattice, f"init", folder="record_local")
 
-    # animate(N, lattice, flipped, previous_count, 0)
+    save_frame(N, lattice, "flipped", iteration=0, folder="record_local")
 
     for i in range(iterations):
 
@@ -109,9 +117,13 @@ def run(N, beta, J, iterations):
             N, beta, J, lattice, seed_y, seed_x, cluster_list, flipped
         )
 
-        visualize(N, lattice, "flipped_local")
+        visualize(N, lattice, "flipped", folder="record_local")
+
+        save_frame(N, lattice, "flipped", iteration=i + 1, folder="record_local")
 
         seed_y, seed_x = get_seed(N)
+
+    make_GIF_local(N, beta, J, "flipped", clean=True)
 
 
 """ Execution """

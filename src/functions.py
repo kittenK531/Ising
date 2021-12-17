@@ -2,6 +2,7 @@ import random
 import shutil
 from pathlib import Path
 
+import imageio
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -173,6 +174,8 @@ def not_terminate(lattice, cluster_list):
 
 def visualize(N, lattice, name, folder="record", printf=False):
 
+    Path(f"{folder}/{N}").mkdir(parents=True, exist_ok=True)
+
     lattice = print_real_lattice(N, lattice, printf=printf, Word=name)
 
     for r in range(N):
@@ -222,8 +225,6 @@ def make_GIF(N, beta, J, foldername="record", clean=True):
 
     Path(f"{foldername}/{N}/{beta}").mkdir(parents=True, exist_ok=True)
 
-    import imageio
-
     iterations = 0
 
     for path in Path(f"{foldername}/{N}/animate/combined").iterdir():
@@ -232,6 +233,36 @@ def make_GIF(N, beta, J, foldername="record", clean=True):
 
     filename = [
         f"{foldername}/{N}/animate/combined/{idx}.png" for idx in range(iterations)
+    ]
+
+    with imageio.get_writer(
+        f"{foldername}/{N}/{beta}/iter{iterations-1}.gif", mode="I"
+    ) as writer:
+
+        for name in filename:
+
+            image = imageio.imread(name)
+            writer.append_data(image)
+
+    print(f"animation saved as {foldername}/{N}/{beta}/iter{iterations-1}.gif")
+
+    if clean:
+
+        shutil.rmtree(f"{foldername}/{N}/animate")
+
+
+def make_GIF_local(N, beta, J, name, foldername="record_local", clean=True):
+
+    Path(f"{foldername}/{N}/{beta}").mkdir(parents=True, exist_ok=True)
+
+    iterations = 0
+
+    for path in Path(f"{foldername}/{N}/animate").iterdir():
+        if path.is_file():
+            iterations += 1
+
+    filename = [
+        f"{foldername}/{N}/animate/{name}_{idx}.png" for idx in range(iterations)
     ]
 
     with imageio.get_writer(
