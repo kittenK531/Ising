@@ -145,7 +145,7 @@ def whole_growth(N, beta, J, detailed=False):
 
     print(f"Total count of iterations: {previous_count}")
 
-    make_GIF(N, beta, J, clean=True)
+    make_GIF(N, beta, J, total = previous_count, clean=True)
 
 
 """ Execution """

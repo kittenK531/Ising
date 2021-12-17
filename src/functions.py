@@ -222,7 +222,7 @@ def combine(N, iteration, foldername="record", name_1="flipped", name_2="crystal
     dst.save(f"{foldername}/{N}/animate/combined/{iteration}.png")
 
 
-def make_GIF(N, beta, J, foldername="record", clean=True):
+def make_GIF(N, beta, J, total, foldername="record", clean=True):
 
     current_time = datetime.now()
 
@@ -239,7 +239,7 @@ def make_GIF(N, beta, J, foldername="record", clean=True):
     ]
 
     with imageio.get_writer(
-        f"{foldername}/{N}/{beta}/iter{iterations-1}_{current_time.day}{current_time.hour}{current_time.minute}.gif",
+        f"{foldername}/{N}/{beta}/iter{total}_{current_time.day}{current_time.hour}{current_time.minute}.gif",
         mode="I",
     ) as writer:
 
@@ -249,7 +249,7 @@ def make_GIF(N, beta, J, foldername="record", clean=True):
             writer.append_data(image)
 
     print(
-        f"animation saved as {foldername}/{N}/{beta}/iter{iterations-1}_{current_time.day}{current_time.hour}{current_time.minute}.gif"
+        f"animation saved as {foldername}/{N}/{beta}/iter{total}_{current_time.day}{current_time.hour}{current_time.minute}.gif"
     )
 
     if clean:
