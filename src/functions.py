@@ -1,10 +1,13 @@
 import random
 import shutil
+from datetime import datetime
 from pathlib import Path
 
 import imageio
 import matplotlib.pyplot as plt
 import numpy as np
+
+current_time = datetime.now()
 
 
 def print_real_lattice(N, lattice, printf=True, Word="Real lattice"):
@@ -236,7 +239,8 @@ def make_GIF(N, beta, J, foldername="record", clean=True):
     ]
 
     with imageio.get_writer(
-        f"{foldername}/{N}/{beta}/iter{iterations-1}.gif", mode="I"
+        f"{foldername}/{N}/{beta}/iter{iterations-1}_{current_time.day}{current_time.hour}{current_time.minute}.gif",
+        mode="I",
     ) as writer:
 
         for name in filename:
@@ -244,7 +248,9 @@ def make_GIF(N, beta, J, foldername="record", clean=True):
             image = imageio.imread(name)
             writer.append_data(image)
 
-    print(f"animation saved as {foldername}/{N}/{beta}/iter{iterations-1}.gif")
+    print(
+        f"animation saved as {foldername}/{N}/{beta}/iter{iterations-1}_{current_time.day}{current_time.hour}{current_time.minute}.gif"
+    )
 
     if clean:
 
@@ -266,7 +272,8 @@ def make_GIF_local(N, beta, J, name, foldername="record_local", clean=True):
     ]
 
     with imageio.get_writer(
-        f"{foldername}/{N}/{beta}/iter{iterations-1}.gif", mode="I"
+        f"{foldername}/{N}/{beta}/iter{iterations-1}_{current_time.day}{current_time.hour}{current_time.minute}.gif",
+        mode="I",
     ) as writer:
 
         for name in filename:
@@ -274,7 +281,9 @@ def make_GIF_local(N, beta, J, name, foldername="record_local", clean=True):
             image = imageio.imread(name)
             writer.append_data(image)
 
-    print(f"animation saved as {foldername}/{N}/{beta}/iter{iterations-1}.gif")
+    print(
+        f"animation saved as {foldername}/{N}/{beta}/iter{iterations-1}_{current_time.day}{current_time.hour}{current_time.minute}.gif"
+    )
 
     if clean:
 
@@ -405,6 +414,21 @@ def get_seed2b_list(N, lattice):
                 count += 1
 
     return not_flipped[:count]
+
+
+def not_converge(N, lattice):
+
+    spin = 0
+
+    for r in range(1, N + 1):
+        for c in range(1, N + 1):
+
+            spin += lattice[r, c]
+
+    if spin > 0:
+        return True
+    else:
+        False
 
 
 """

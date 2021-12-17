@@ -143,8 +143,16 @@ def whole_growth(N, beta, J):
 
 
 """ Execution """
-J = 1.0
-N = 5
-beta = 0.2
 
-whole_growth(N, beta, J)
+import argparse
+
+parser = argparse.ArgumentParser()
+parser.add_argument("--N", default=5, type=int)
+parser.add_argument("--beta", default=0.2, type=float)
+parser.add_argument("--J", default=1.0, type=float)
+
+args = parser.parse_args()
+
+whole_growth(args.N, args.beta, args.J)
+
+""" python3 init.py --N 5 --beta 0.2 """

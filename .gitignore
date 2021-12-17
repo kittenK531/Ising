@@ -9,3 +9,5 @@
 
 # Ignore cache
 **/__pycache__/
+record/
+record_local/

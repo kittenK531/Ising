@@ -6,6 +6,7 @@ from functions import (
     get_seed,
     initialize,
     make_GIF_local,
+    not_converge,
     preparation,
     save_frame,
     sequence_loop,
@@ -97,7 +98,7 @@ def iterative(N, beta, J, lattice, seed_y, seed_x, cluster_list, flipped):
     return lattice, flipped
 
 
-def run(N, beta, J, iterations):
+def run(N, beta, J):
 
     seed_y, seed_x = get_seed(N)
 
@@ -107,7 +108,9 @@ def run(N, beta, J, iterations):
 
     save_frame(N, lattice, "flipped", iteration=0, folder="record_local")
 
-    for i in range(iterations):
+    i = 0
+
+    while not_converge(N, lattice):
 
         print(f"Overall MCS teration: {i+1}")
 
@@ -123,15 +126,24 @@ def run(N, beta, J, iterations):
 
         seed_y, seed_x = get_seed(N)
 
+        i += 1
+
     make_GIF_local(N, beta, J, "flipped", clean=True)
 
 
-""" Execution """
-J = 1.0
-N = 50
-beta = 0.2
-
 # Note: b = 0.2 converge on 3rd run
-# TODO: animate and while loop
 
-run(N, beta, J, 10)
+""" Execution """
+
+import argparse
+
+parser = argparse.ArgumentParser()
+parser.add_argument("--N", default=5, type=int)
+parser.add_argument("--beta", default=0.2, type=float)
+parser.add_argument("--J", default=1.0, type=float)
+
+args = parser.parse_args()
+
+run(args.N, args.beta, args.J)
+
+""" python3 MCS.py --N 50 --beta 0.2 """
