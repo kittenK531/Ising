@@ -60,7 +60,7 @@ def iterative(
 
     spin0 = lattice[seed_y, seed_x]
 
-    animate(N, lattice, flipped, previous_count, 0)
+    # animate(N, lattice, flipped, previous_count, 0)
 
     i = 0
 
@@ -93,6 +93,8 @@ def whole_growth(N, beta, J):
     lattice, flipped = initialize(N, seed_x, seed_y)
 
     previous_count = 0
+
+    animate(N, lattice, flipped, previous_count, 0)
 
     unflipp_num = 1
 
@@ -137,12 +139,12 @@ def whole_growth(N, beta, J):
 
     print(f"Total count of iterations: {previous_count}")
 
-    make_GIF(N, clean=True)
+    make_GIF(N, beta, J, clean=True)
 
 
 """ Execution """
 J = 1.0
-N = 50
+N = 5
 beta = 0.2
 
 whole_growth(N, beta, J)
