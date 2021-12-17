@@ -53,6 +53,7 @@ def iterative(
     lattice_pos,
     crystal,
     previous_count,
+    detailed=False,
 ):
 
     seed_y, seed_x = start_y, start_x
@@ -72,7 +73,8 @@ def iterative(
         visualize(N, lattice, "flipped")
         visualize(N, flipped, "crystal")
 
-        animate(N, lattice, flipped, previous_count, iterations=i + 1)
+        if detailed:
+            animate(N, lattice, flipped, previous_count, iterations=i + 1)
 
         index_arr = get_index_outer(cluster_list)
         # print(index_arr)
@@ -86,7 +88,7 @@ def iterative(
     return lattice, flipped, iterations
 
 
-def whole_growth(N, beta, J):
+def whole_growth(N, beta, J, detailed=False):
 
     seed_y, seed_x = get_seed(N)
 
@@ -121,7 +123,11 @@ def whole_growth(N, beta, J):
             lattice,
             crystal,
             previous_count,
+            detailed,
         )
+
+        if not detailed:
+            animate(N, lattice, flipped, 0, iterations=i + 1)
 
         unflipped = get_seed2b_list(N, lattice)
 
@@ -150,9 +156,10 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--N", default=5, type=int)
 parser.add_argument("--beta", default=0.2, type=float)
 parser.add_argument("--J", default=1.0, type=float)
+parser.add_argument("--detailed", default=False, type=bool)
 
 args = parser.parse_args()
 
-whole_growth(args.N, args.beta, args.J)
+whole_growth(args.N, args.beta, args.J, detailed=args.detailed)
 
 """ python3 init.py --N 5 --beta 0.2 """
