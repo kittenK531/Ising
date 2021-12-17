@@ -2,7 +2,7 @@ import random
 
 import numpy as np
 
-from functions import preparation, sequence_loop, visualize
+from functions import get_seed, initialize, preparation, sequence_loop, visualize
 
 
 def tabulated_energy(beta, J=1.0):
@@ -17,14 +17,24 @@ def tabulated_energy(beta, J=1.0):
 
 def get_energy(x, y, lattice, N):
 
-    top = lattice[int(x), int(y) + 1]
-    bottom = lattice[int(x), int(y) - 1]
-    left = lattice[int(x) - 1, int(y)]
-    right = lattice[int(x) + 1, int(y)]
+    dxy = np.array([[0, 1], [-1, 0], [0, -1], [1, 0]])
 
-    interaction_E = -1 * lattice[int(x), int(y)] * (top + bottom + left + right)
+    spin0 = lattice[int(x), int(y)]
 
-    return interaction_E
+    E = 0
+
+    for j in dxy:
+
+        cy, cx = y + j[0], x + j[1]
+
+        spinc = lattice[int(cy), int(cx)]
+
+        if spinc < 1:
+            spinc = -1
+
+        E -= spin0 * spinc
+
+    return E
 
 
 def get_Boltzmann_factor(E_diff, energy2table):
@@ -54,8 +64,10 @@ def MCS(N, beta, J, lattice, seed_y, seed_x, cluster_list, flipped):
         cluster_list = np.vstack((cluster_list, new_cluster_mem))
         flipped[int(y), int(x)] = 1
 
+    """
     print(f"Energy difference is {E_diff}")
     print(f"The boltzmann factor is {get_Boltzmann_factor(E_diff, energy2table)}.")
+    """
 
     return lattice, cluster_list, flipped
 
@@ -77,19 +89,37 @@ def iterative(N, beta, J, lattice, seed_y, seed_x, cluster_list, flipped):
     return lattice, flipped
 
 
+def run(N, beta, J, iterations):
+
+    seed_y, seed_x = get_seed(N)
+
+    lattice, flipped = initialize(N, seed_x, seed_y)
+
+    visualize(N, lattice, f"init_local")
+
+    # animate(N, lattice, flipped, previous_count, 0)
+
+    for i in range(iterations):
+
+        print(f"Overall MCS teration: {i+1}")
+
+        cluster_list, crystal = preparation(lattice, seed_x, seed_y)
+
+        lattice, flipped = iterative(
+            N, beta, J, lattice, seed_y, seed_x, cluster_list, flipped
+        )
+
+        visualize(N, lattice, "flipped_local")
+
+        seed_y, seed_x = get_seed(N)
+
+
 """ Execution """
 J = 1.0
 N = 50
 beta = 0.2
 
-lattice, seed_y, seed_x, cluster_list, flipped, crystal = preparation(N)
+# Note: b = 0.2 converge on 3rd run
+# TODO: animate and while loop
 
-# MCS(N, beta, J, lattice, seed_y, seed_x, cluster_list, flipped)
-lattice, flipped = iterative(N, beta, J, lattice, seed_y, seed_x, cluster_list, flipped)
-
-visualize(N, lattice, "flipped_local")
-visualize(N, flipped, "crystal_local")
-"""
-visualize(N, lattice, f"init_local")
-MCS(N, beta, J, seed_x, seed_y, lattice, cluster_list, flipped)
-print(f"Tabulated energy array is {tabulated_energy(beta, J)}")"""
+run(N, beta, J, 10)
