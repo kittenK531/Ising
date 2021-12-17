@@ -7,8 +7,6 @@ import imageio
 import matplotlib.pyplot as plt
 import numpy as np
 
-current_time = datetime.now()
-
 
 def print_real_lattice(N, lattice, printf=True, Word="Real lattice"):
 
@@ -226,6 +224,8 @@ def combine(N, iteration, foldername="record", name_1="flipped", name_2="crystal
 
 def make_GIF(N, beta, J, foldername="record", clean=True):
 
+    current_time = datetime.now()
+
     Path(f"{foldername}/{N}/{beta}").mkdir(parents=True, exist_ok=True)
 
     iterations = 0
@@ -258,6 +258,8 @@ def make_GIF(N, beta, J, foldername="record", clean=True):
 
 
 def make_GIF_local(N, beta, J, name, foldername="record_local", clean=True):
+
+    current_time = datetime.now()
 
     Path(f"{foldername}/{N}/{beta}").mkdir(parents=True, exist_ok=True)
 
