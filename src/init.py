@@ -1,9 +1,9 @@
 import random
+from datetime import datetime
 
 import numpy as np
 
 from functions import (
-    animate,
     flip,
     get_index_outer,
     get_P_add,
@@ -11,14 +11,16 @@ from functions import (
     get_seed2b_list,
     initialize,
     is_neighbour,
-    make_GIF,
     not_terminate,
     preparation,
     sequence_loop,
     visualize,
 )
 
+current_time = datetime.now()
+
 from multiprocessing import Pool, freeze_support
+
 
 def growth(sequence, lattice, spin0, Pr, cluster_list, crystal):
 
@@ -70,17 +72,17 @@ def iterative(
         cluster_list = growth(array, lattice, spin0, Pr, cluster_list, crystal)
         # print(f"Cluster: {cluster_list}")
         lattice, flipped = flip(lattice, cluster_list, seed_x, seed_y, flipped)
-        visualize(N, lattice, "flipped")
-        visualize(N, flipped, "crystal")
-
+        # visualize(N, beta, lattice, "flipped")
+        # visualize(N, beta, flipped, "crystal")
+        """
         if detailed:
             animate(N, beta, lattice, flipped, previous_count, iterations=i + 1)
-
+        """
         index_arr = get_index_outer(cluster_list)
         # print(index_arr)
         r = random.randint(0, len(index_arr) - 1)
         seed_y, seed_x = cluster_list[r, :]
-        print(f"iter: {i+1} Seed: {seed_y, seed_x}")
+        print(f"beta: {beta:.2f} iter: {previous_count + i + 1} Seed: {seed_y, seed_x}")
         i += 1
 
     iterations = i
@@ -96,7 +98,7 @@ def whole_growth(N, beta, J, detailed=False):
 
     previous_count = 0
 
-    animate(N, beta, lattice, flipped, previous_count, 0)
+    # animate(N, beta, lattice, flipped, previous_count, 0)
 
     unflipp_num = 1
 
@@ -104,12 +106,12 @@ def whole_growth(N, beta, J, detailed=False):
 
     while unflipp_num > 0:
 
-        print(f"Overall cluster iteration: {i+1}")
+        # print(f"Overall cluster iteration: {i+1}")
 
         cluster_list, crystal = preparation(lattice, seed_x, seed_y)
 
         if i == 0:
-            visualize(N, lattice, f"init")
+            visualize(N, beta, lattice, f"init")
 
         Pr = get_P_add(beta, J)
 
@@ -126,10 +128,10 @@ def whole_growth(N, beta, J, detailed=False):
             previous_count,
             detailed,
         )
-
+        """
         if not detailed:
             animate(N, beta, lattice, flipped, 0, iterations=i + 1)
-
+        """
         unflipped = get_seed2b_list(N, lattice)
 
         previous_count += cluster_iter
@@ -144,9 +146,21 @@ def whole_growth(N, beta, J, detailed=False):
 
         i += 1
 
-    print(f"Total count of iterations: {previous_count}")
+    print(f"beta: {beta:.2f} Total count of iterations: {previous_count}")
+    visualize(
+        N,
+        beta,
+        lattice,
+        f"flipped_{previous_count}_{current_time.day}{current_time.hour}{current_time.minute}",
+    )
+    visualize(
+        N,
+        beta,
+        flipped,
+        f"crystal_{previous_count}_{current_time.day}{current_time.hour}{current_time.minute}",
+    )
 
-    make_GIF(N, beta, J, total = previous_count, clean=True)
+    # make_GIF(N, beta, J, total = previous_count, clean=True)
 
 
 """ Execution """
@@ -163,11 +177,22 @@ args = parser.parse_args()
 
 # whole_growth(args.N, args.beta, args.J, detailed=args.detailed)
 
+
 def main():
     with Pool() as pool:
-        pool.starmap(whole_growth, [(args.N, args.beta, args.J), (args.N, args.beta+0.1, args.J), (args.N, args.beta+0.2, args.J)])
+        pool.starmap(
+            whole_growth,
+            [
+                (args.N, args.beta, args.J),
+                (args.N, args.beta + 0.1, args.J),
+                (args.N, args.beta + 0.2, args.J),
+                (args.N, args.beta + 0.3, args.J),
+                (args.N, args.beta + 0.4, args.J),
+            ],
+        )
 
-if __name__=="__main__":
+
+if __name__ == "__main__":
     freeze_support()
     main()
 
