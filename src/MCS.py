@@ -103,11 +103,6 @@ def iterative(
 
         print(f"iter: {count + 1} Seed: {y, x}")
 
-        if detailed:
-            save_frame(
-                N, beta, lattice, "flipped", iteration=count + 1, folder="record_local"
-            )
-
     return lattice, flipped, count
 
 
@@ -137,10 +132,7 @@ def run(N, beta, J, detailed=False):
 
         visualize(N, beta, lattice, "flipped", folder="record_local")
 
-        if not detailed:
-            save_frame(
-                N, beta, lattice, "flipped", iteration=i + 1, folder="record_local"
-            )
+        save_frame(N, beta, lattice, "flipped", iteration=i + 1, folder="record_local")
 
         seed_y, seed_x = get_seed(N)
 
