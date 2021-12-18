@@ -253,7 +253,7 @@ def make_GIF(N, beta, J, total, foldername="record", clean=True):
         shutil.rmtree(f"{foldername}/{N}/{beta:.2f}/animate")
 
 
-def make_GIF_local(N, beta, J, name, foldername="record_local", clean=True):
+def make_GIF_local(N, beta, J, total, name, foldername="record_local", clean=True):
 
     current_time = datetime.now()
 
@@ -270,7 +270,7 @@ def make_GIF_local(N, beta, J, name, foldername="record_local", clean=True):
     ]
 
     with imageio.get_writer(
-        f"{foldername}/{N}/{beta:.2f}/iter{iterations-1}_{current_time.day}{current_time.hour}{current_time.minute}.gif",
+        f"{foldername}/{N}/{beta:.2f}/iter{total}_{current_time.day}{current_time.hour}{current_time.minute}.gif",
         mode="I",
     ) as writer:
 
@@ -280,7 +280,7 @@ def make_GIF_local(N, beta, J, name, foldername="record_local", clean=True):
             writer.append_data(image)
 
     print(
-        f"animation saved as {foldername}/{N}/{beta:.2f}/iter{iterations-1}_{current_time.day}{current_time.hour}{current_time.minute}.gif"
+        f"animation saved as {foldername}/{N}/{beta:.2f}/iter{total}_{current_time.day}{current_time.hour}{current_time.minute}.gif"
     )
 
     if clean:

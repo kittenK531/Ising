@@ -19,7 +19,7 @@ def tabulated_energy(beta, J=1.0):
     energy_record = np.zeros((5, 2))
 
     for idx, dEo in enumerate([-8, -4, 0, 4, 8]):
-        energy_record[idx, :] = dEo, np.exp(-1 * beta * dEo * J)
+        energy_record[idx, :] = dEo, np.clip(np.exp(-1 * beta * dEo * J), 0, 1)
 
     return energy_record
 
@@ -53,7 +53,7 @@ def get_Boltzmann_factor(E_diff, energy2table):
             return energy2table[idx, 1]
 
 
-def MCS(N, beta, J, lattice, seed_y, seed_x, cluster_list, flipped):
+def MCS(N, beta, J, lattice, seed_y, seed_x, cluster_list, flipped, count):
 
     x, y = seed_y, seed_x
     Eo = get_energy(x, y, lattice, N)
@@ -73,32 +73,42 @@ def MCS(N, beta, J, lattice, seed_y, seed_x, cluster_list, flipped):
         cluster_list = np.vstack((cluster_list, new_cluster_mem))
         flipped[int(y), int(x)] = 1
 
+        count += 1
+
     """
     print(f"Energy difference is {E_diff}")
     print(f"The boltzmann factor is {get_Boltzmann_factor(E_diff, energy2table)}.")
     """
+    
 
-    return lattice, cluster_list, flipped
+    return lattice, cluster_list, flipped, count
 
 
-def iterative(N, beta, J, lattice, seed_y, seed_x, cluster_list, flipped):
+def iterative(N, beta, J, lattice, seed_y, seed_x, cluster_list, flipped, detailed = True):
 
     x, y = seed_y, seed_x
 
     array = sequence_loop(N, x, y)
 
+    count = 0
+
     for i in array:
 
         x, y = int(i[0]), int(i[1])
 
-        lattice, cluster_list, flipped = MCS(
-            N, beta, J, lattice, x, y, cluster_list, flipped
+        lattice, cluster_list, flipped, count = MCS(
+            N, beta, J, lattice, x, y, cluster_list, flipped, count
         )
 
-    return lattice, flipped
+        print(f"iter: {count + 1} Seed: {y, x}")
+
+        if detailed:
+            save_frame(N, beta, lattice, "flipped", iteration=count + 1, folder="record_local")
+
+    return lattice, flipped, count
 
 
-def run(N, beta, J):
+def run(N, beta, J, detailed=True):
 
     seed_y, seed_x = get_seed(N)
 
@@ -106,9 +116,11 @@ def run(N, beta, J):
 
     visualize(N, lattice, f"init", folder="record_local")
 
-    save_frame(N, lattice, "flipped", iteration=0, folder="record_local")
+    save_frame(N, beta, lattice, "flipped", iteration=0, folder="record_local")
 
     i = 0
+
+    previous_count = 0
 
     while not_converge(N, lattice):
 
@@ -116,19 +128,22 @@ def run(N, beta, J):
 
         cluster_list, crystal = preparation(lattice, seed_x, seed_y)
 
-        lattice, flipped = iterative(
+        lattice, flipped, count = iterative(
             N, beta, J, lattice, seed_y, seed_x, cluster_list, flipped
         )
 
         visualize(N, lattice, "flipped", folder="record_local")
 
-        save_frame(N, lattice, "flipped", iteration=i + 1, folder="record_local")
+        if (not detailed):
+            save_frame(N, beta, lattice, "flipped", iteration=i + 1, folder="record_local")
 
         seed_y, seed_x = get_seed(N)
 
         i += 1
 
-    make_GIF_local(N, beta, J, "flipped", clean=True)
+        previous_count += count
+
+    make_GIF_local(N, beta, J, previous_count, "flipped", clean=True)
 
 
 # Note: b = 0.2 converge on 3rd run
@@ -141,9 +156,19 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--N", default=5, type=int)
 parser.add_argument("--beta", default=0.2, type=float)
 parser.add_argument("--J", default=1.0, type=float)
+parser.add_argument("--detailed", default=False, type=bool)
 
 args = parser.parse_args()
 
-run(args.N, args.beta, args.J)
+
+from multiprocessing import Pool, freeze_support
+
+def main():
+    with Pool() as pool:
+        pool.starmap(run, [(args.N, args.beta, args.J), (args.N, args.beta + 0.1, args.J), (args.N, args.beta + 0.2, args.J), (args.N, args.beta + 0.3, args.J), (args.N, args.beta + 0.4, args.J), (args.N, args.beta+0.5, args.J), (args.N, args.beta+0.6, args.J), (args.N, args.beta+0.7, args.J), (args.N, args.beta+0.8, args.J)])
+
+if __name__=="__main__":
+    freeze_support()
+    main()
 
 """ python3 MCS.py --N 50 --beta 0.2 """
