@@ -18,6 +18,7 @@ from functions import (
     visualize,
 )
 
+from multiprocessing import Pool, freeze_support
 
 def growth(sequence, lattice, spin0, Pr, cluster_list, crystal):
 
@@ -45,6 +46,7 @@ def growth(sequence, lattice, spin0, Pr, cluster_list, crystal):
 
 def iterative(
     N,
+    beta,
     start_x,
     start_y,
     Pr,
@@ -61,8 +63,6 @@ def iterative(
 
     spin0 = lattice[seed_y, seed_x]
 
-    # animate(N, lattice, flipped, previous_count, 0)
-
     i = 0
 
     while not_terminate(lattice, cluster_list):
@@ -74,7 +74,7 @@ def iterative(
         visualize(N, flipped, "crystal")
 
         if detailed:
-            animate(N, lattice, flipped, previous_count, iterations=i + 1)
+            animate(N, beta, lattice, flipped, previous_count, iterations=i + 1)
 
         index_arr = get_index_outer(cluster_list)
         # print(index_arr)
@@ -96,7 +96,7 @@ def whole_growth(N, beta, J, detailed=False):
 
     previous_count = 0
 
-    animate(N, lattice, flipped, previous_count, 0)
+    animate(N, beta, lattice, flipped, previous_count, 0)
 
     unflipp_num = 1
 
@@ -115,6 +115,7 @@ def whole_growth(N, beta, J, detailed=False):
 
         lattice, flipped, cluster_iter = iterative(
             N,
+            beta,
             seed_x,
             seed_y,
             Pr,
@@ -127,7 +128,7 @@ def whole_growth(N, beta, J, detailed=False):
         )
 
         if not detailed:
-            animate(N, lattice, flipped, 0, iterations=i + 1)
+            animate(N, beta, lattice, flipped, 0, iterations=i + 1)
 
         unflipped = get_seed2b_list(N, lattice)
 
@@ -160,6 +161,14 @@ parser.add_argument("--detailed", default=False, type=bool)
 
 args = parser.parse_args()
 
-whole_growth(args.N, args.beta, args.J, detailed=args.detailed)
+# whole_growth(args.N, args.beta, args.J, detailed=args.detailed)
+
+def main():
+    with Pool() as pool:
+        pool.starmap(whole_growth, [(args.N, args.beta, args.J), (args.N, args.beta+0.1, args.J), (args.N, args.beta+0.2, args.J)])
+
+if __name__=="__main__":
+    freeze_support()
+    main()
 
 """ python3 init.py --N 5 --beta 0.2 """

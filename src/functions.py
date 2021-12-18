@@ -184,18 +184,16 @@ def visualize(N, lattice, name, folder="record", printf=False):
             if lattice[r, c] < 0:
                 lattice[r, c] = 0
 
-    Path(f"{folder}/{N}").mkdir(parents=True, exist_ok=True)
-
     plt.imshow(lattice, cmap="Greys")
     plt.savefig(f"{folder}/{N}/{name}_{N}.png")
     plt.show(block=False)
 
 
-def save_frame(N, lattice, name, iteration, folder="record"):
+def save_frame(N, beta, lattice, name, iteration, folder="record"):
 
     lattice = print_real_lattice(N, lattice, printf=False, Word=name)
 
-    Path(f"{folder}/{N}/animate").mkdir(parents=True, exist_ok=True)
+    Path(f"{folder}/{N}/{beta:.2f}/animate").mkdir(parents=True, exist_ok=True)
 
     for r in range(N):
         for c in range(N):
@@ -203,43 +201,41 @@ def save_frame(N, lattice, name, iteration, folder="record"):
                 lattice[r, c] = 0
 
     plt.imshow(lattice, cmap="Greys")
-    plt.savefig(f"{folder}/{N}/animate/{name}_{iteration}.png")
+    plt.savefig(f"{folder}/{N}/{beta:.2f}/animate/{name}_{iteration}.png")
     plt.show(block=False)
 
 
-def combine(N, iteration, foldername="record", name_1="flipped", name_2="crystal"):
+def combine(N, beta, iteration, foldername="record", name_1="flipped", name_2="crystal"):
 
     from PIL import Image
 
-    im1 = Image.open(f"{foldername}/{N}/animate/{name_1}_{iteration}.png")
-    im2 = Image.open(f"{foldername}/{N}/animate/{name_2}_{iteration}.png")
+    im1 = Image.open(f"{foldername}/{N}/{beta:.2f}/animate/{name_1}_{iteration}.png")
+    im2 = Image.open(f"{foldername}/{N}/{beta:.2f}/animate/{name_2}_{iteration}.png")
 
     dst = Image.new("RGB", (im1.width + im2.width, im1.height))
     dst.paste(im1, (0, 0))
     dst.paste(im2, (im1.width, 0))
 
-    Path(f"{foldername}/{N}/animate/combined").mkdir(parents=True, exist_ok=True)
-    dst.save(f"{foldername}/{N}/animate/combined/{iteration}.png")
+    Path(f"{foldername}/{N}/{beta:.2f}/animate/combined").mkdir(parents=True, exist_ok=True)
+    dst.save(f"{foldername}/{N}/{beta:.2f}/animate/combined/{iteration}.png")
 
 
 def make_GIF(N, beta, J, total, foldername="record", clean=True):
 
     current_time = datetime.now()
 
-    Path(f"{foldername}/{N}/{beta}").mkdir(parents=True, exist_ok=True)
-
     iterations = 0
 
-    for path in Path(f"{foldername}/{N}/animate/combined").iterdir():
+    for path in Path(f"{foldername}/{N}/{beta:.2f}/animate/combined").iterdir():
         if path.is_file():
             iterations += 1
 
     filename = [
-        f"{foldername}/{N}/animate/combined/{idx}.png" for idx in range(iterations)
+        f"{foldername}/{N}/{beta:.2f}/animate/combined/{idx}.png" for idx in range(iterations)
     ]
 
     with imageio.get_writer(
-        f"{foldername}/{N}/{beta}/iter{total}_{current_time.day}{current_time.hour}{current_time.minute}.gif",
+        f"{foldername}/{N}/{beta:.2f}/iter{total}_{current_time.day}{current_time.hour}{current_time.minute}.gif",
         mode="I",
     ) as writer:
 
@@ -249,32 +245,32 @@ def make_GIF(N, beta, J, total, foldername="record", clean=True):
             writer.append_data(image)
 
     print(
-        f"animation saved as {foldername}/{N}/{beta}/iter{total}_{current_time.day}{current_time.hour}{current_time.minute}.gif"
+        f"animation saved as {foldername}/{N}/{beta:.2f}/iter{total}_{current_time.day}{current_time.hour}{current_time.minute}.gif"
     )
 
     if clean:
 
-        shutil.rmtree(f"{foldername}/{N}/animate")
+        shutil.rmtree(f"{foldername}/{N}/{beta:.2f}/animate")
 
 
 def make_GIF_local(N, beta, J, name, foldername="record_local", clean=True):
 
     current_time = datetime.now()
 
-    Path(f"{foldername}/{N}/{beta}").mkdir(parents=True, exist_ok=True)
+    Path(f"{foldername}/{N}/{beta:.2f}").mkdir(parents=True, exist_ok=True)
 
     iterations = 0
 
-    for path in Path(f"{foldername}/{N}/animate").iterdir():
+    for path in Path(f"{foldername}/{N}/{beta:.2f}/animate").iterdir():
         if path.is_file():
             iterations += 1
 
     filename = [
-        f"{foldername}/{N}/animate/{name}_{idx}.png" for idx in range(iterations)
+        f"{foldername}/{N}/{beta:.2f}/animate/{name}_{idx}.png" for idx in range(iterations)
     ]
 
     with imageio.get_writer(
-        f"{foldername}/{N}/{beta}/iter{iterations-1}_{current_time.day}{current_time.hour}{current_time.minute}.gif",
+        f"{foldername}/{N}/{beta:.2f}/iter{iterations-1}_{current_time.day}{current_time.hour}{current_time.minute}.gif",
         mode="I",
     ) as writer:
 
@@ -284,21 +280,21 @@ def make_GIF_local(N, beta, J, name, foldername="record_local", clean=True):
             writer.append_data(image)
 
     print(
-        f"animation saved as {foldername}/{N}/{beta}/iter{iterations-1}_{current_time.day}{current_time.hour}{current_time.minute}.gif"
+        f"animation saved as {foldername}/{N}/{beta:.2f}/iter{iterations-1}_{current_time.day}{current_time.hour}{current_time.minute}.gif"
     )
 
     if clean:
 
-        shutil.rmtree(f"{foldername}/{N}/animate")
+        shutil.rmtree(f"{foldername}/{N}/{beta:.2f}/animate")
 
 
-def animate(N, lattice, flipped, previous_count, iterations):
+def animate(N, beta, lattice, flipped, previous_count, iterations):
 
     idx = previous_count + iterations
 
-    save_frame(N, lattice, "flipped", iteration=idx)
-    save_frame(N, flipped, "crystal", iteration=idx)
-    combine(N, iteration=idx)
+    save_frame(N, beta, lattice, "flipped", iteration=idx)
+    save_frame(N, beta, flipped, "crystal", iteration=idx)
+    combine(N, beta, iteration=idx)
 
 
 def sequence_loop(N, start_y, start_x):
