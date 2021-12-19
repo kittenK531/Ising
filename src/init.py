@@ -1,8 +1,8 @@
 import random
+import time
 from datetime import datetime
 
 import numpy as np
-import time
 
 from functions import (
     flip,
@@ -14,13 +14,12 @@ from functions import (
     is_neighbour,
     not_terminate,
     preparation,
+    print_real_lattice,
     sequence_loop,
     visualize,
 )
 
 current_time = datetime.now()
-
-from multiprocessing import Pool, freeze_support
 
 
 def growth(sequence, lattice, spin0, Pr, cluster_list, crystal):
@@ -76,12 +75,12 @@ def iterative(
         end = time.time()
 
         print(f"small iteration time {end - start}")
-        
+
         start_f = time.time()
         lattice, flipped = flip(lattice, cluster_list, seed_x, seed_y, flipped)
         end_f = time.time()
         print(f"flip time {end_f - start_f}")
-        
+
         index_arr = get_index_outer(cluster_list)
         # print(index_arr)
         r = random.randint(0, len(index_arr) - 1)
@@ -105,8 +104,6 @@ def whole_growth(N, beta, J, detailed=False):
 
     # animate(N, beta, lattice, flipped, previous_count, 0)
 
-    unflipp_num = 1
-
     i = 0
 
     visualize(N, beta, lattice, f"init")
@@ -116,7 +113,9 @@ def whole_growth(N, beta, J, detailed=False):
     end_i = time.time()
     print(f"initialize time: {end_i - start_i}")
 
-    while unflipp_num > 0:
+    real_lattice = print_real_lattice(N, lattice, False)
+
+    while real_lattice.sum() > 0:
 
         # print(f"Overall cluster iteration: {i+1}")
 
@@ -156,6 +155,8 @@ def whole_growth(N, beta, J, detailed=False):
             break
 
         i += 1
+
+        real_lattice = print_real_lattice(N, lattice, False)
 
     print(f"beta: {beta:.2f} Total count of iterations: {previous_count}")
     visualize(
