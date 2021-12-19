@@ -5,7 +5,7 @@ This code is written in Python3 to use monte carlo simulation for the crystal gr
 A virtual python environment is recommended
 Follow the guideline for anaconda users.
 ```
-conda create -ny ising python==3.8
+conda create -n ising python==3.8
 conda activate ising
 pip3 install tqdm matplotlib imageio
 ```
@@ -26,3 +26,6 @@ Running this command produces the record_local/ folder that saves the GIF files 
 cd src && python3 init.py --N 50 --beta 0.2
 ```
 Running this command produces the record/ folder that saves the GIF files under different values of beta value folders.
+
+#### Sample result
+![hi](./docs/images/1.12/iter269_181359.gif)
