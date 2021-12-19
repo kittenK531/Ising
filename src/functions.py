@@ -205,7 +205,9 @@ def save_frame(N, beta, lattice, name, iteration, folder="record"):
     plt.show(block=False)
 
 
-def combine(N, beta, iteration, foldername="record", name_1="flipped", name_2="crystal"):
+def combine(
+    N, beta, iteration, foldername="record", name_1="flipped", name_2="crystal"
+):
 
     from PIL import Image
 
@@ -216,7 +218,9 @@ def combine(N, beta, iteration, foldername="record", name_1="flipped", name_2="c
     dst.paste(im1, (0, 0))
     dst.paste(im2, (im1.width, 0))
 
-    Path(f"{foldername}/{N}/{beta:.2f}/animate/combined").mkdir(parents=True, exist_ok=True)
+    Path(f"{foldername}/{N}/{beta:.2f}/animate/combined").mkdir(
+        parents=True, exist_ok=True
+    )
     dst.save(f"{foldername}/{N}/{beta:.2f}/animate/combined/{iteration}.png")
 
 
@@ -231,7 +235,8 @@ def make_GIF(N, beta, J, total, foldername="record", clean=True):
             iterations += 1
 
     filename = [
-        f"{foldername}/{N}/{beta:.2f}/animate/combined/{idx}.png" for idx in range(iterations)
+        f"{foldername}/{N}/{beta:.2f}/animate/combined/{idx}.png"
+        for idx in range(iterations)
     ]
 
     with imageio.get_writer(
@@ -266,7 +271,8 @@ def make_GIF_local(N, beta, J, total, name, foldername="record_local", clean=Tru
             iterations += 1
 
     filename = [
-        f"{foldername}/{N}/{beta:.2f}/animate/{name}_{idx}.png" for idx in range(iterations)
+        f"{foldername}/{N}/{beta:.2f}/animate/{name}_{idx}.png"
+        for idx in range(iterations)
     ]
 
     with imageio.get_writer(

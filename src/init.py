@@ -1,4 +1,5 @@
 import random
+from multiprocessing import Pool, freeze_support
 
 import numpy as np
 
@@ -18,7 +19,6 @@ from functions import (
     visualize,
 )
 
-from multiprocessing import Pool, freeze_support
 
 def growth(sequence, lattice, spin0, Pr, cluster_list, crystal):
 
@@ -102,16 +102,15 @@ def whole_growth(N, beta, J, detailed=False):
 
     i = 0
 
+    visualize(N, lattice, f"init")
+
+    Pr = get_P_add(beta, J)
+
     while unflipp_num > 0:
 
         print(f"Overall cluster iteration: {i+1}")
 
         cluster_list, crystal = preparation(lattice, seed_x, seed_y)
-
-        if i == 0:
-            visualize(N, lattice, f"init")
-
-        Pr = get_P_add(beta, J)
 
         lattice, flipped, cluster_iter = iterative(
             N,
@@ -146,7 +145,7 @@ def whole_growth(N, beta, J, detailed=False):
 
     print(f"Total count of iterations: {previous_count}")
 
-    make_GIF(N, beta, J, total = previous_count, clean=True)
+    make_GIF(N, beta, J, total=previous_count, clean=True)
 
 
 """ Execution """
@@ -163,11 +162,20 @@ args = parser.parse_args()
 
 # whole_growth(args.N, args.beta, args.J, detailed=args.detailed)
 
+
 def main():
     with Pool() as pool:
-        pool.starmap(whole_growth, [(args.N, args.beta, args.J), (args.N, args.beta+0.1, args.J), (args.N, args.beta+0.2, args.J)])
+        pool.starmap(
+            whole_growth,
+            [
+                (args.N, args.beta, args.J),
+                (args.N, args.beta + 0.1, args.J),
+                (args.N, args.beta + 0.2, args.J),
+            ],
+        )
 
-if __name__=="__main__":
+
+if __name__ == "__main__":
     freeze_support()
     main()
 

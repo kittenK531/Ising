@@ -79,12 +79,13 @@ def MCS(N, beta, J, lattice, seed_y, seed_x, cluster_list, flipped, count):
     print(f"Energy difference is {E_diff}")
     print(f"The boltzmann factor is {get_Boltzmann_factor(E_diff, energy2table)}.")
     """
-    
 
     return lattice, cluster_list, flipped, count
 
 
-def iterative(N, beta, J, lattice, seed_y, seed_x, cluster_list, flipped, detailed = True):
+def iterative(
+    N, beta, J, lattice, seed_y, seed_x, cluster_list, flipped, detailed=True
+):
 
     x, y = seed_y, seed_x
 
@@ -103,7 +104,9 @@ def iterative(N, beta, J, lattice, seed_y, seed_x, cluster_list, flipped, detail
         print(f"iter: {count + 1} Seed: {y, x}")
 
         if detailed:
-            save_frame(N, beta, lattice, "flipped", iteration=count + 1, folder="record_local")
+            save_frame(
+                N, beta, lattice, "flipped", iteration=count + 1, folder="record_local"
+            )
 
     return lattice, flipped, count
 
@@ -134,8 +137,10 @@ def run(N, beta, J, detailed=True):
 
         visualize(N, lattice, "flipped", folder="record_local")
 
-        if (not detailed):
-            save_frame(N, beta, lattice, "flipped", iteration=i + 1, folder="record_local")
+        if not detailed:
+            save_frame(
+                N, beta, lattice, "flipped", iteration=i + 1, folder="record_local"
+            )
 
         seed_y, seed_x = get_seed(N)
 
@@ -163,11 +168,26 @@ args = parser.parse_args()
 
 from multiprocessing import Pool, freeze_support
 
+
 def main():
     with Pool() as pool:
-        pool.starmap(run, [(args.N, args.beta, args.J), (args.N, args.beta + 0.1, args.J), (args.N, args.beta + 0.2, args.J), (args.N, args.beta + 0.3, args.J), (args.N, args.beta + 0.4, args.J), (args.N, args.beta+0.5, args.J), (args.N, args.beta+0.6, args.J), (args.N, args.beta+0.7, args.J), (args.N, args.beta+0.8, args.J)])
+        pool.starmap(
+            run,
+            [
+                (args.N, args.beta, args.J),
+                (args.N, args.beta + 0.1, args.J),
+                (args.N, args.beta + 0.2, args.J),
+                (args.N, args.beta + 0.3, args.J),
+                (args.N, args.beta + 0.4, args.J),
+                (args.N, args.beta + 0.5, args.J),
+                (args.N, args.beta + 0.6, args.J),
+                (args.N, args.beta + 0.7, args.J),
+                (args.N, args.beta + 0.8, args.J),
+            ],
+        )
 
-if __name__=="__main__":
+
+if __name__ == "__main__":
     freeze_support()
     main()
 
