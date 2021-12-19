@@ -17,6 +17,7 @@ from functions import (
     preparation,
     sequence_loop,
     visualize,
+    print_real_lattice,
 )
 
 
@@ -98,15 +99,15 @@ def whole_growth(N, beta, J, detailed=False):
 
     animate(N, beta, lattice, flipped, previous_count, 0)
 
-    unflipp_num = 1
-
     i = 0
 
     visualize(N, lattice, f"init")
 
     Pr = get_P_add(beta, J)
 
-    while unflipp_num > 0:
+    real_lattice = print_real_lattice(N, lattice, False)
+
+    while real_lattice.sum() > 0:
 
         print(f"Overall cluster iteration: {i+1}")
 
@@ -143,6 +144,8 @@ def whole_growth(N, beta, J, detailed=False):
 
         i += 1
 
+        real_lattice = print_real_lattice(N, lattice, False)
+
     print(f"Total count of iterations: {previous_count}")
 
     make_GIF(N, beta, J, total=previous_count, clean=True)
@@ -160,9 +163,9 @@ parser.add_argument("--detailed", default=False, type=bool)
 
 args = parser.parse_args()
 
-# whole_growth(args.N, args.beta, args.J, detailed=args.detailed)
+whole_growth(args.N, args.beta, args.J, detailed=args.detailed)
 
-
+"""
 def main():
     with Pool() as pool:
         pool.starmap(
@@ -178,5 +181,5 @@ def main():
 if __name__ == "__main__":
     freeze_support()
     main()
-
+"""
 """ python3 init.py --N 5 --beta 0.2 """
