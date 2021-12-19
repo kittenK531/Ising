@@ -1,6 +1,7 @@
 import random
 import time
 from datetime import datetime
+from multiprocessing import Pool, freeze_support
 
 import numpy as np
 
@@ -187,19 +188,30 @@ parser.add_argument("--detailed", default=False, type=bool)
 
 args = parser.parse_args()
 
-whole_growth(args.N, args.beta, args.J, detailed=args.detailed)
+# whole_growth(args.N, args.beta, args.J, detailed=args.detailed)
 
-"""
+
 def main():
     with Pool() as pool:
         pool.starmap(
             whole_growth,
             [
-                (args.N, args.beta, args.J),
-                (args.N, args.beta + 0.1, args.J),
-                (args.N, args.beta + 0.2, args.J),
-                (args.N, args.beta + 0.3, args.J),
-                (args.N, args.beta + 0.4, args.J),
+                (args.N, 0.4, args.J),
+                (args.N, 0.41, args.J),
+                (args.N, 0.42, args.J),
+                (args.N, 0.43, args.J),
+                (args.N, 0.44, args.J),
+                (args.N, 0.45, args.J),
+                (args.N, 0.46, args.J),
+                (args.N, 0.47, args.J),
+                (args.N, 0.48, args.J),
+                (args.N, 0.49, args.J),
+                (args.N, 0.50, args.J),
+                (args.N, 0.35, args.J),
+                (args.N, 0.36, args.J),
+                (args.N, 0.37, args.J),
+                (args.N, 0.38, args.J),
+                (args.N, 0.39, args.J),
             ],
         )
 
@@ -207,6 +219,6 @@ def main():
 if __name__ == "__main__":
     freeze_support()
     main()
-"""
+
 
 """ python3 init.py --N 5 --beta 0.2 """
